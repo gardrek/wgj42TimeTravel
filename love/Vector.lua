@@ -1,6 +1,5 @@
 -- Generic Vector class, with any number of elements
 local Vector = {}
---setmetatable(Vector, Vector)
 Vector.class = 'Vector'
 
 Vector.name = {
@@ -42,6 +41,7 @@ function Vector:dup()
   local obj = {}
   for i = 1, #self do
     obj[i] = self[i]
+    if type(obj[i]) ~= 'number' then error('non-number vectors not allowed') end
   end
   for n, i in pairs(Vector.name) do
     if self[Vector.name[n]] then
@@ -93,11 +93,13 @@ function Vector:__sub(other)
     for i = 1, #self do
       r[i] = self[i] - other
     end
-  else
+  elseif type(other) == 'table' and other.class == 'Vector' then
     if #self ~= #other then error('Attempt to subtract unlike Vectors.', 2) end
     for i = 1, #self do
       r[i] = self[i] - other[i]
     end
+  else
+    error(tostring(other), 2)
   end
   return r
 end
@@ -165,6 +167,14 @@ function Vector:__eq(other)
   return true
 end
 
+function Vector:unpack()
+  local t = {}
+  for i = 1, #self do
+    t[i] = self[i]
+  end
+  return unpack(t)
+end
+
 -- 2D-only functions
 
 function Vector:rotate(angle)
@@ -190,14 +200,6 @@ function Vector:draw(x, y, scale, arrow)
     end
     love.graphics.line(x, y, t.x + x, t.y + y)
   end
-end
-
-function Vector:unpack()
-  local t = {}
-  for i = 1, #self do
-    t[i] = self[i]
-  end
-  return unpack(t)
 end
 
 return Vector
